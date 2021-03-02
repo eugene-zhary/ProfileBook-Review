@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Frame xmlns="http://xamarin.com/schemas/2014/forms" 
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="ProfileBook.Dialogs.PickImageDialog"
+       xmlns:prism="http://prismlibrary.com"
+       prism:DialogLayout.RelativeWidthRequest="0.75"
+       prism:DialogLayout.RelativeHeightRequest="0.15"
+       prism:DialogLayout.UseMask="True"
+       prism:DialogLayout.LayoutBounds="0.5, 0.85, -1, -1"
+       prism:DialogLayout.MaskStyle="{StaticResource PickImgStyle}"
+       BackgroundColor="{DynamicResource FrontColor}" CornerRadius="20" Padding="0" HasShadow="True">
+    <Grid>
+        <Grid.Resources>
+            <ResourceDictionary>
+                <Style TargetType="Button">
+                    <Setter Property="ContentLayout" Value="Top,0"/>
+                    <Setter Property="BackgroundColor" Value="{DynamicResource BackColor}"/>
+                    <Setter Property="TextColor" Value="{DynamicResource PrimaryColor}"/>
+                    <Setter Property="CornerRadius" Value="5"/>
+                </Style>
+            </ResourceDictionary>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <Button Grid.Column="0" Text="Camera" Command="{Binding CameraCommand}"
+            ImageSource="{Binding CameraImagePath}" Margin="20,20,5,20"/>
+        <Button Grid.Column="1" Text="Gallery" Command="{Binding GalleryCommand}"
+            ImageSource="{Binding GalleryImagePath}" Margin="5,20,20,20"/>
+    </Grid>
+</Frame>

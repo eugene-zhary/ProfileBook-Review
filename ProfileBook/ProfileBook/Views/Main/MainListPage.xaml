@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="http://prismlibrary.com"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="ProfileBook.Views.MainListPage"
+             Title="{Binding Resources[MainTitle]}" BackgroundColor="{DynamicResource BackColor}">
+    <ContentPage.Resources>
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="{DynamicResource PrimaryColor}"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="BackgroundColor" Value="{DynamicResource FrontColor}"/>
+        </Style>
+    </ContentPage.Resources>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="ic_exit_to_app.png" Command="{Binding LogOutCommand}"/>
+        <ToolbarItem IconImageSource="ic_settings.png" Command="{Binding SettingsCommand}"/>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Label Text="{Binding Resources[MainEmptyList]}" IsVisible="{Binding IsEmpty}"
+               VerticalOptions="Center" HorizontalOptions="Center"/>
+
+        <ListView x:Name="list" ItemsSource="{Binding ProfileList}" HasUnevenRows="True"
+                  ItemSelected="ListView_ItemSelected">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <ViewCell.ContextActions>
+                            <MenuItem Text="{Binding Source={x:Reference list}, Path=BindingContext.Resources[MainEdit]}" 
+                                      Command="{Binding EditProfileCommand}"/>
+                            <MenuItem Text="{Binding Source={x:Reference list}, Path=BindingContext.Resources[MainDelete]}" 
+                                      Command="{Binding RemoveProfileCommand}"/>
+                        </ViewCell.ContextActions>
+
+                        <Grid Padding="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.RowSpan="3" Source="{Binding Image}" Aspect="AspectFill" HeightRequest="100" WidthRequest="100">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowImageCommand}"/>
+                                </Image.GestureRecognizers>
+                            </Image>
+                            <Label Grid.Column="2" Grid.Row="0" Text="{Binding NickName}" FontAttributes="Bold"/>
+                            <Label Grid.Column="2" Grid.Row="1" Text="{Binding Name}"/>
+                            <Label Grid.Column="2" Grid.Row="2" Text="{Binding CreationDate}"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+
+        <Button Command="{Binding AddProfileCommand}"
+                ImageSource="ic_add.png" HorizontalOptions="End" VerticalOptions="End"
+                WidthRequest="70" HeightRequest="70" CornerRadius="35" Margin="0,0,20,35"/>
+    </Grid>
+</ContentPage>

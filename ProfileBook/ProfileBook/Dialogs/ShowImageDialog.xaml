@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Grid  xmlns="http://xamarin.com/schemas/2014/forms" 
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="ProfileBook.Dialogs.ShowImageDialog"
+       xmlns:prism="http://prismlibrary.com"
+       prism:DialogLayout.UseMask="True">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Image Source="{Binding Image}" Aspect="AspectFill" WidthRequest="300" HeightRequest="300">
+        <Image.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+        </Image.GestureRecognizers>
+    </Image>
+</Grid>

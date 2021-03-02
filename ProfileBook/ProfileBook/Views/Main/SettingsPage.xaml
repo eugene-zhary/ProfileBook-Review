@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="http://prismlibrary.com"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="ProfileBook.Views.Main.SettingsPage"
+             xmlns:res="clr-namespace:ProfileBook.Properties"
+             Title="{Binding Resources[SettingsTitle]}" BackgroundColor="{DynamicResource BackColor}">
+    <Grid Padding="35">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Text="{Binding Resources[SettingsSort]}" 
+               FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}"/>
+        <StackLayout Grid.Row="1" Margin="0,0,0,50">
+            <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortNickName]}"
+                         IsChecked="{Binding IsNickNameChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+            <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortName]}"
+                         IsChecked="{Binding IsNameChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+            <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortDate]}"
+                         IsChecked="{Binding IsDateChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+        </StackLayout>
+
+        <CheckBox Grid.Row="2" Color="{DynamicResource PrimaryColor}" IsChecked="{Binding IsDark}"/>
+        <Label Grid.Row="2" Margin="35,0,0,0" TextColor="{DynamicResource PrimaryColor}"
+               Text="{Binding Resources[SettingsDarkTheme]}" FontAttributes="Bold" FontSize="18"/>
+
+
+        <Label Grid.Row="4" Grid.Column="0" Text="{Binding Resources[SettingsLanguage]}"
+               VerticalTextAlignment="Center" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}"/>
+        
+        <StackLayout Grid.Row="5">
+            <RadioButton GroupName="Lang" FontSize="18" Content="{Binding Resources[SettingsEnglish]}"
+                         IsChecked="{Binding IsEnglishChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+            <RadioButton GroupName="Lang" FontSize="18" Content="{Binding Resources[SettingsRussian]}"
+                         IsChecked="{Binding IsRussianChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+        </StackLayout>
+    </Grid>
+</ContentPage>

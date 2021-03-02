@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="http://prismlibrary.com"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="ProfileBook.Views.AddEditPage"
+             Title="{Binding Resources[AddEditTitle]}" BackgroundColor="{DynamicResource BackColor}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="ic_save.png" Command="{Binding SaveProfileCommand}"/>
+    </ContentPage.ToolbarItems>
+    <Grid Padding="35">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Image Source="{Binding CurrentProfile.Image}">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding OpenImageDialogCommand}"/>
+            </Image.GestureRecognizers>
+        </Image>
+
+        <Entry Grid.Row="1" Text="{Binding CurrentProfile.NickName}" Margin="0,30,0,0" PlaceholderColor="Gray" 
+               Placeholder="{Binding Resources[AddEditNickName]}" 
+               TextColor="{DynamicResource PrimaryColor}"/>
+
+        <Entry Grid.Row="2" Text="{Binding CurrentProfile.Name}" PlaceholderColor="Gray"
+               Placeholder="{Binding Resources[AddEditName]}" 
+               TextColor="{DynamicResource PrimaryColor}"/>
+
+        <Editor Grid.Row="3" Text="{Binding CurrentProfile.Description}" Margin="0,30,0,0" PlaceholderColor="Gray"
+               Placeholder="{Binding Resources[AddEditDescription]}" 
+               TextColor="{DynamicResource PrimaryColor}"/>
+    </Grid>
+</ContentPage>

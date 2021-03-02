@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<prism:PrismApplication xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="http://prismlibrary.com"
+             x:Class="ProfileBook.App">
+    <prism:PrismApplication.Resources>
+        <ResourceDictionary>
+            <Style TargetType="BoxView" x:Key="PickImgStyle">
+                <Setter Property="Opacity" Value="0" />
+            </Style>
+            <Color x:Key="PrimaryColor">#1d3557</Color>
+            <Color x:Key="BackColor">White</Color>
+            <Color x:Key="FrontColor">#0077b6</Color>
+            <Style TargetType="NavigationPage">
+                <Setter Property="BarBackgroundColor" Value="{DynamicResource FrontColor}"></Setter>
+                <Setter Property="BarTextColor" Value="White"></Setter>
+            </Style>
+        </ResourceDictionary>
+    </prism:PrismApplication.Resources>
+</prism:PrismApplication>
