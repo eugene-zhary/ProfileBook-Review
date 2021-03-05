@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProfileBook.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : IModel, new()
+    public class Repository<T> : IRepository<T> where T : IEntityModel, new()
     {
         private SQLiteAsyncConnection connection;
 

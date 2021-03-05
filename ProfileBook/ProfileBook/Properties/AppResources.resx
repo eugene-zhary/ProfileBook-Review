@@ -181,10 +181,10 @@
     <value>Date</value>
   </data>
   <data name="SettingsSortName" xml:space="preserve">
-    <value>NickName</value>
+    <value>Name</value>
   </data>
   <data name="SettingsSortNickName" xml:space="preserve">
-    <value>Name</value>
+    <value>NickName</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>Settings</value>

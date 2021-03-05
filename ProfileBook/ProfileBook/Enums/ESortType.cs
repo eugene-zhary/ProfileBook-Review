@@ -4,10 +4,10 @@ using System.Text;
 
 namespace ProfileBook.Enums
 {
-    public enum SortType
+    public enum ESortType
     {
         Name,
         NickName,
-        Date
+        CreationDate
     }
 }

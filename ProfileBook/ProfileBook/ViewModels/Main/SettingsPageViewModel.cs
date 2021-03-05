@@ -1,189 +1,139 @@
 ﻿using Prism.Navigation;
 using ProfileBook.Enums;
-using ProfileBook.Localization;
-using ProfileBook.Services;
 using ProfileBook.Services.Settings;
-using System.Collections.Generic;
-using Xamarin.Forms;
+using System.ComponentModel;
 
 namespace ProfileBook.ViewModels
 {
     public class SettingsPageViewModel : ViewModelBase
     {
-        private ISettingsService settingsService;
+        private ISettingsManager _settingsManager;
 
-        #region sort
+        #region --- Properties ---
 
-        private bool isDateChecked;
+        private bool _isDateChecked;
         public bool IsDateChecked {
-            get => isDateChecked;
-            set {
-                SetProperty(ref isDateChecked, value, nameof(IsDateChecked));
-                if (value) {
-                    updateSort(SortType.Date);
-                }
-            }
+            get => _isDateChecked;
+            set => SetProperty(ref _isDateChecked, value, nameof(IsDateChecked));
         }
 
-        private bool isNameChecked;
+        private bool _isNameChecked;
         public bool IsNameChecked {
-            get => isNameChecked;
-            set {
-                SetProperty(ref isNameChecked, value, nameof(IsNameChecked));
-                if (value) {
-                    updateSort(SortType.Name);
-                }
-            }
+            get => _isNameChecked;
+            set => SetProperty(ref _isNameChecked, value, nameof(IsNameChecked));
         }
 
-        private bool isNickNameChecked;
+        private bool _isNickNameChecked;
         public bool IsNickNameChecked {
-            get => isNickNameChecked;
-            set {
-                SetProperty(ref isNickNameChecked, value, nameof(IsNickNameChecked));
-                if (value) {
-                    updateSort(SortType.NickName);
-                }
-            }
+            get => _isNickNameChecked;
+            set => SetProperty(ref _isNickNameChecked, value, nameof(IsNickNameChecked));
         }
 
-        #endregion
-
-        #region themes
-
-        private bool isDark;
+        private bool _isDark;
         public bool IsDark {
-            get => isDark;
-            set {
-                SetProperty(ref isDark, value, nameof(IsDark));
-
-                // set or update current theme
-                if (value)
-                    ThemeManager.UpdateTheme(Theme.Dark);
-                else
-                    ThemeManager.UpdateTheme(Theme.Light);
-            }
+            get => _isDark;
+            set => SetProperty(ref _isDark, value, nameof(IsDark));
         }
 
-        #endregion
-
-        #region lang
-
-        private bool isEnglishChecked;
+        private bool _isEnglishChecked;
         public bool IsEnglishChecked {
-            get => isEnglishChecked;
-            set {
-                SetProperty(ref isEnglishChecked, value, nameof(IsEnglishChecked));
-                if (value) {
-                    updateLang(Language.English);
-                }
-            }
+            get => _isEnglishChecked;
+            set => SetProperty(ref _isEnglishChecked, value, nameof(IsEnglishChecked));
         }
 
-        private bool isRussianChecked;
+        private bool _isRussianChecked;
         public bool IsRussianChecked {
-            get => isRussianChecked;
-            set {
-                SetProperty(ref isRussianChecked, value, nameof(IsRussianChecked));
-                if (value) {
-                    updateLang(Language.Russian);
-                }
-            }
+            get => _isRussianChecked;
+            set => SetProperty(ref _isRussianChecked, value, nameof(IsRussianChecked));
         }
 
         #endregion
 
-        public SettingsPageViewModel(INavigationService navigationService, ISettingsService settingsService) : base(navigationService)
+        public SettingsPageViewModel(INavigationService navigationService, ISettingsManager settingsService) : base(navigationService)
         {
+            this._settingsManager = settingsService;
+
             setSortCheck();
             setThemeCheck();
             setLangCheck();
-            this.settingsService = settingsService;
         }
 
+        #region --- Overrides ---
 
-        public override async void OnNavigatedFrom(INavigationParameters parameters)
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
         {
-            base.OnNavigatedFrom(parameters);
+            base.OnPropertyChanged(args);
 
-            // update settings in the database
-            await settingsService.UpdateSettings(App.CurrentSettings);
-        }
-
-
-        /// <summary>
-        /// update the local sort settings
-        /// </summary>
-        /// <param name="sort">SortType</param>
-        private void updateSort(SortType sort)
-        {
-            if (App.CurrentSettings.Sort != sort) {
-                App.CurrentSettings.Sort = sort;
-                App.UpdateList = true;
+            if (args.PropertyName == nameof(IsDateChecked) && IsDateChecked) {
+                _settingsManager.SortType = ESortType.CreationDate;
+                _settingsManager.IsListUpdated = true;
+            }
+            else if (args.PropertyName == nameof(IsNameChecked) && IsNameChecked) {
+                _settingsManager.SortType = ESortType.Name;
+                _settingsManager.IsListUpdated = true;
+            }
+            else if (args.PropertyName == nameof(IsNickNameChecked) && IsNickNameChecked) {
+                _settingsManager.SortType = ESortType.NickName;
+                _settingsManager.IsListUpdated = true;
+            }
+            else if (args.PropertyName == nameof(IsDark)) {
+                _settingsManager.Theme = (IsDark) ? ETheme.Dark : ETheme.Light;
+            }
+            else if (args.PropertyName == nameof(IsEnglishChecked) && IsEnglishChecked) {
+                _settingsManager.Language = ELanguage.English;
+            }
+            else if (args.PropertyName == nameof(IsRussianChecked) && IsRussianChecked) {
+                _settingsManager.Language = ELanguage.Russian;
             }
         }
 
-        /// <summary>
-        /// update the local language settings
-        /// </summary>
-        /// <param name="language">Language</param>
-        private void updateLang(Language language)
-        {
-            App.CurrentSettings.Language = language;
-            MessagingCenter.Send<object, CultureChangedMessage>(this, string.Empty, new CultureChangedMessage(language));
-        }
+        #endregion
 
+        #region --- Helpers ---
 
-
-        /// <summary>
-        /// set the current theme checked
-        /// </summary>
         private void setThemeCheck()
         {
-            switch (App.CurrentSettings.Theme) {
-                case Theme.Light:
+            switch (_settingsManager.Theme) {
+                case ETheme.Light:
                 default:
-                    isDark = false;
+                    _isDark = false;
                     break;
-                case Theme.Dark:
-                    isDark = true;
+                case ETheme.Dark:
+                    _isDark = true;
                     break;
             }
         }
 
-        /// <summary>
-        /// set the current sort type checked
-        /// </summary>
         private void setSortCheck()
         {
-            switch (App.CurrentSettings.Sort) {
-                case SortType.Date:
+            switch (_settingsManager.SortType) {
+                case ESortType.CreationDate
+:
                 default:
-                    isDateChecked = true;
+                    _isDateChecked = true;
                     break;
-                case SortType.Name:
-                    isNameChecked = true;
+                case ESortType.Name:
+                    _isNameChecked = true;
                     break;
-                case SortType.NickName:
-                    isNickNameChecked = true;
+                case ESortType.NickName:
+                    _isNickNameChecked = true;
                     break;
             }
         }
 
-        /// <summary>
-        /// set the current lang checked
-        /// </summary>
         private void setLangCheck()
         {
-            switch (App.CurrentSettings.Language) {
-                case Language.English:
+            switch (_settingsManager.Language) {
+                case ELanguage.English:
                 default:
-                    isEnglishChecked = true;
+                    _isEnglishChecked = true;
                     break;
-                case Language.Russian:
-                    isRussianChecked = true;
+                case ELanguage.Russian:
+                    _isRussianChecked = true;
                     break;
             }
         }
+
+        #endregion
     }
 }

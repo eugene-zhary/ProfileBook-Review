@@ -250,7 +250,7 @@ namespace ProfileBook.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NickName.
+        ///   Looks up a localized string similar to Name.
         /// </summary>
         internal static string SettingsSortName {
             get {
@@ -259,7 +259,7 @@ namespace ProfileBook.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name.
+        ///   Looks up a localized string similar to NickName.
         /// </summary>
         internal static string SettingsSortNickName {
             get {

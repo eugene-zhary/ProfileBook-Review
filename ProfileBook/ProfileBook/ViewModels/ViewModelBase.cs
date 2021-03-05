@@ -1,7 +1,10 @@
 ﻿using Prism.Mvvm;
 using Prism.Navigation;
+using ProfileBook.Enums;
 using ProfileBook.Localization;
 using ProfileBook.Properties;
+using System;
+using Xamarin.Essentials;
 
 namespace ProfileBook.ViewModels
 {
@@ -15,9 +18,8 @@ namespace ProfileBook.ViewModels
         {
             NavigationService = navigationService;
 
-            Resources = (App.CurrentSettings != null) ? 
-                new LocalizedResources(typeof(AppResources), App.CurrentSettings.Language) : 
-                new LocalizedResources(typeof(AppResources), Enums.Language.English);
+            var lang_type = (ELanguage)Enum.Parse(typeof(ELanguage), Preferences.Get("Language", ELanguage.English.ToString()));
+            Resources = new LocalizedResources(typeof(AppResources), lang_type);
         }
 
         public virtual void Initialize(INavigationParameters parameters)

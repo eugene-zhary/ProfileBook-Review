@@ -7,7 +7,7 @@ namespace ProfileBook.Localization
     {
         public CultureInfo NewCultureInfo { get; private set; }
 
-        public CultureChangedMessage(Language lang)
+        public CultureChangedMessage(ELanguage lang)
         {
             NewCultureInfo = LocalizedResources.GetCultureInfo(lang);
         }

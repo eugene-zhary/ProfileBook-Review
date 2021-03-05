@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ProfileBook.Enums
 {
-    public enum Language
+    public enum ETheme
     {
-        Russian,
-        English
+        Dark,
+        Light
     }
 }

@@ -1,14 +1,8 @@
 using Prism;
 using Prism.Ioc;
-using Prism.Navigation;
 using ProfileBook.Dialogs;
-using ProfileBook.Enums;
-using ProfileBook.Models;
 using ProfileBook.Repositories;
-using ProfileBook.Services;
-using ProfileBook.Services.Authentication;
 using ProfileBook.Services.Authorization;
-using ProfileBook.Services.Main;
 using ProfileBook.Services.Profile;
 using ProfileBook.Services.Repository;
 using ProfileBook.Services.Settings;
@@ -16,54 +10,34 @@ using ProfileBook.ViewModels;
 using ProfileBook.ViewModels.Dialogs;
 using ProfileBook.Views;
 using ProfileBook.Views.Main;
-using Xamarin.Essentials.Implementation;
-using Xamarin.Essentials.Interfaces;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace ProfileBook
 {
     public partial class App
     {
-        /// <summary>
-        /// local user
-        /// </summary>
-        public static User CurrentUser { get; set; }
-        /// <summary>
-        /// local settings
-        /// </summary>
-        public static Settings CurrentSettings { get; set; }
-        /// <summary>
-        /// update list in the main page after navigation
-        /// </summary>
-        public static bool UpdateList { get; set; }
-
         public App(IPlatformInitializer initializer) : base(initializer) { }
 
         protected override async void OnInitialized()
         {
             InitializeComponent();
-            CurrentUser = LocalService.ReadUser();
-
-            if (CurrentUser == null) {
-                await NavigationService.NavigateAsync("NavigationPage/SignInPage");
+           
+            if (Preferences.Get("UserId", 0) == 0) {
+                await NavigationService.NavigateAsync($"{nameof(NavigationPage)}/{nameof(SignInPage)}");
             }
             else {
-                UpdateList = true;
-                await NavigationService.NavigateAsync("NavigationPage/MainListPage");
+                await NavigationService.NavigateAsync($"{nameof(NavigationPage)}/{nameof(MainListPage)}");
             }
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterSingleton<IAppInfo, AppInfoImplementation>();
-
             //services
             containerRegistry.Register(typeof(IRepository<>), typeof(Repository<>));
-            containerRegistry.Register<IAuthenticationService, AuthenticationService>();
-            containerRegistry.Register<IAuthorizationService, AuthorizationService>();
-            containerRegistry.Register<IMainService, MainService>();
-            containerRegistry.Register<IProfileService, ProfileService>();
-            containerRegistry.Register<ISettingsService, SettingsService>();
+            containerRegistry.RegisterInstance<ISettingsManager>(Container.Resolve<SettingsManager>());
+            containerRegistry.RegisterInstance<IAuthorizationManager>(Container.Resolve<AuthorizationManager>());
+            containerRegistry.RegisterInstance<IProfileManager>(Container.Resolve<ProfileManager>());
 
             //dialogs
             containerRegistry.RegisterDialog<ShowImageDialog, ShowImageDialogViewModel>();
@@ -77,6 +51,5 @@ namespace ProfileBook
             containerRegistry.RegisterForNavigation<AddEditPage, AddEditPageViewModel>();
             containerRegistry.RegisterForNavigation<SettingsPage, SettingsPageViewModel>();
         }
-
     }
 }

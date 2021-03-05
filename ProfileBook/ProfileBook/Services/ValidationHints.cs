@@ -1,10 +1,6 @@
 ﻿using ProfileBook.Models;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
-using ProfileBook.Properties;
-using ProfileBook.Localization;
 
 namespace ProfileBook.Validators
 {
@@ -45,15 +41,15 @@ namespace ProfileBook.Validators
         /// <param name="profile"></param>
         /// <param name="resources">Current LocalizadResources</param>
         /// <returns>hits for add, update profile data</returns>
-        public static string GetProfileHints(Profile profile, LocalizedResources resources)
+        public static string GetProfileHints(Profile profile, string name_hint, string nickName_hint)
         {
             string alert = String.Empty;
 
             if (profile.Name == null || profile.Name.Equals(String.Empty)) {
-                alert += resources["AddEditValidateName"];
+                alert += name_hint;
             }
             if (profile.NickName == null || profile.NickName.Equals(String.Empty)) {
-                alert += resources["AddEditValidateNickName"];
+                alert += nickName_hint;
             }
 
             return alert;

@@ -19,10 +19,12 @@
         <Label Text="{Binding Resources[SettingsSort]}" 
                FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}"/>
         <StackLayout Grid.Row="1" Margin="0,0,0,50">
-            <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortNickName]}"
-                         IsChecked="{Binding IsNickNameChecked}" TextColor="{DynamicResource PrimaryColor}"/>
             <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortName]}"
                          IsChecked="{Binding IsNameChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+            
+            <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortNickName]}"
+                         IsChecked="{Binding IsNickNameChecked}" TextColor="{DynamicResource PrimaryColor}"/>
+            
             <RadioButton GroupName="Sort" FontSize="18" Content="{Binding Resources[SettingsSortDate]}"
                          IsChecked="{Binding IsDateChecked}" TextColor="{DynamicResource PrimaryColor}"/>
         </StackLayout>

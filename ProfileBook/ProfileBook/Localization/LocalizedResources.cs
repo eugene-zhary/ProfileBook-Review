@@ -16,7 +16,7 @@ namespace ProfileBook.Localization
             get => ResourceManager.GetString(key, CurrentCultureInfo);
         }
 
-        public LocalizedResources(Type resource, Language language)
+        public LocalizedResources(Type resource, ELanguage language)
         {
             CurrentCultureInfo = GetCultureInfo(language);
             ResourceManager = new ResourceManager(resource);
@@ -37,12 +37,12 @@ namespace ProfileBook.Localization
         /// </summary>
         /// <param name="lang">Language enum</param>
         /// <returns>CultureInfo</returns>
-        public static CultureInfo GetCultureInfo(Language lang)
+        public static CultureInfo GetCultureInfo(ELanguage lang)
         {
             switch (lang) {
-                case Language.Russian:
+                case ELanguage.Russian:
                     return new CultureInfo("ru");
-                case Language.English:
+                case ELanguage.English:
                 default:
                     return new CultureInfo("en");
             }

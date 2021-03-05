@@ -181,10 +181,10 @@
     <value>Дате</value>
   </data>
   <data name="SettingsSortName" xml:space="preserve">
-    <value>Псевдониму</value>
+    <value>Имени</value>
   </data>
   <data name="SettingsSortNickName" xml:space="preserve">
-    <value>Имени</value>
+    <value>Псевдониму</value>
   </data>
   <data name="SettingsTitle" xml:space="preserve">
     <value>Настройки</value>

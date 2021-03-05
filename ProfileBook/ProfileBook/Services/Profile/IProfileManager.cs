@@ -5,20 +5,17 @@ using System.Threading.Tasks;
 
 namespace ProfileBook.Services.Profile
 {
-    public interface IProfileService
+    public interface IProfileManager
     {
         /// <summary>
         /// Save the profile to the database
         /// </summary>
         /// <param name="profile">Profile Model</param>
         /// <returns>if added successfuly returns true otherwise returns false</returns>
-        Task<bool> SaveProfile(Models.Profile profile);
+        Task SaveProfile(Models.Profile profile);
 
-        /// <summary>
-        /// Returns picked image from gallery or camera
-        /// </summary>
-        /// <param name="profile">Profile Model</param>
-        /// <returns>image path</returns>
-        Task<string> GetImagePath(Models.Profile profile);
+        Task<IEnumerable<Models.Profile>> GetProfiles(int user_id);
+
+        Task RemoveProfile(Models.Profile profile);
     }
 }

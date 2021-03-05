@@ -1,155 +1,131 @@
 ﻿using Prism.Navigation;
+using Prism.Services;
+using Prism.Services.Dialogs;
+using ProfileBook.Dialogs;
 using ProfileBook.Models;
-using ProfileBook.Services;
-using ProfileBook.Services.Main;
+using ProfileBook.Properties;
+using ProfileBook.Services.Profile;
+using ProfileBook.Services.Settings;
 using ProfileBook.Views;
 using ProfileBook.Views.Main;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
-using ProfileBook.Localization;
 
 namespace ProfileBook.ViewModels
 {
     public class MainListPageViewModel : ViewModelBase
     {
-        private readonly IMainService mainService;
+        private readonly IProfileManager _profileManager;
+        private readonly ISettingsManager _settingsManager;
+        private readonly IDialogService _dialogService;
+        private readonly IPageDialogService _pageDialogService;
+
+        #region --- Properties ---
 
         public ObservableCollection<Profile> ProfileList { get; set; }
 
-        private bool isEmpty;
+        private bool _isEmpty;
         public bool IsEmpty {
-            get => isEmpty;
-            set => SetProperty(ref isEmpty, value, nameof(IsEmpty));
-        }
-
-        public MainListPageViewModel(INavigationService navigationService, IMainService mainService) : base(navigationService)
-        {
-            App.CurrentSettings = LocalService.ReadSettings();
-
-            this.mainService = mainService;
-            this.IsEmpty = true;
-            this.ProfileList = new ObservableCollection<Profile>();
-
-            this.LogOutCommand = new Command(executeLogOut);
-            this.AddProfileCommand = new Command(executeAddProfile);
-            this.SettingsCommand = new Command(executeSettingsCommand);
-        }
-
-
-        // fill the profile list from database
-        private async Task updateProfileList()
-        {
-            this.ProfileList.Clear();
-            var profiles = await mainService.GetProfiles(App.CurrentUser.Id);
-
-            if (profiles != null) {
-                profiles.ToList().ForEach(item => {
-                    //Add all events
-                    item.RemoveProfile += Item_RemoveProfile;
-                    item.EditProfile += Item_EditProfile;
-                    item.ShowImage += Item_ShowImage;
-                    this.ProfileList.Add(item);
-                });
-            }
-
-            UpdateLabel();
-        }
-
-        #region commands
-
-        public ICommand LogOutCommand { get; private set; }
-
-        /// <summary>
-        /// log out from current profile
-        /// </summary>
-        private async void executeLogOut()
-        {
-            ThemeManager.UpdateTheme(Enums.Theme.Light);
-            LocalService.Delete();
-            await NavigationService.NavigateAsync($"/NavigationPage/{nameof(SignInPage)}");
-        }
-
-        public ICommand AddProfileCommand { get; private set; }
-
-        /// <summary>
-        /// add new profile
-        /// </summary>
-        private async void executeAddProfile()
-        {
-            await NavigationService.NavigateAsync(nameof(AddEditPage));
-        }
-        
-        public ICommand SettingsCommand { get; private set; }
-
-        /// <summary>
-        /// navigate to the settings
-        /// </summary>
-        private async void executeSettingsCommand()
-        {
-            await NavigationService.NavigateAsync(nameof(SettingsPage));
+            get => _isEmpty;
+            set => SetProperty(ref _isEmpty, value, nameof(IsEmpty));
         }
 
         #endregion
 
-        #region profile list events
-
-        // show selected profile image
-        private async void Item_ShowImage(object sender, System.EventArgs e)
+        public MainListPageViewModel(INavigationService navigationService,
+            IProfileManager profileManager,
+            ISettingsManager settingsManager,
+            IDialogService dialogService,
+            IPageDialogService pageDialogService) : base(navigationService)
         {
-            if (sender is Profile profile) {
-                await this.mainService.ShowImage(profile.Image);
-            }
+            this._profileManager = profileManager;
+            this._settingsManager = settingsManager;
+            this._dialogService = dialogService;
+            this._pageDialogService = pageDialogService;
+
+            this.ProfileList = new ObservableCollection<Profile>();
+            this.IsEmpty = true;
         }
 
-        // edit selected profile
-        private async void Item_EditProfile(object sender, System.EventArgs e)
-        {
+        #region --- Comands ---
+
+        public ICommand RemoveProfileCommand => new Command(async (sender) => {
+
+            bool isConfirmed = await _pageDialogService.DisplayAlertAsync(AppResources.MainDelete, AppResources.MainDeleteConfirm, AppResources.Accept, AppResources.Denie);
+
+            if (sender is Profile profile && isConfirmed) {
+                await _profileManager.RemoveProfile(profile);
+                this.ProfileList.Remove(profile);
+            }
+        });
+
+        public ICommand EditProfileCommand => new Command(async (sender) => {
             if (sender is Profile profile) {
                 var nav_params = new NavigationParameters {
                     { "Profile", profile }
                 };
-                await NavigationService.NavigateAsync("AddEditPage", nav_params);
+                await NavigationService.NavigateAsync($"{nameof(AddEditPage)}", nav_params);
             }
-        }
+        });
 
-        // remove selected profile
-        private async void Item_RemoveProfile(object sender, System.EventArgs e)
-        {
-            if (sender is Profile profile && await mainService.RemoveProfile(profile)) {
-                //remove all events
-                profile.EditProfile -= Item_EditProfile;
-                profile.RemoveProfile -= Item_RemoveProfile;
-                profile.ShowImage -= Item_ShowImage;
-                this.ProfileList.Remove(profile);
-                UpdateLabel();
+        public ICommand ShowImageCommand => new Command(async (sender) => {
+            if (sender is Profile profile) {
+                var dialog_params = new DialogParameters {
+                    {"Image", ImageSource.FromFile(profile.Image) }
+                };
+                await _dialogService.ShowDialogAsync(nameof(ShowImageDialog), dialog_params);
             }
-        }
+        });
+
+        public ICommand AddProfileCommand => new Command(async () => {
+            await NavigationService.NavigateAsync(nameof(AddEditPage));
+        });
+
+        public ICommand SettingsCommand => new Command(async () => {
+            await NavigationService.NavigateAsync(nameof(SettingsPage));
+        });
+
+        public ICommand LogOutCommand => new Command(async () => {
+            _settingsManager.ClearSettings();
+            await NavigationService.NavigateAsync($"/{nameof(NavigationPage)}/{nameof(SignInPage)}");
+        });
 
         #endregion
 
-        /// <summary>
-        /// enable label if the profile list is empty
-        /// </summary>
-        private void UpdateLabel()
-        {
-            IsEmpty = (ProfileList.Count <= 0);
-        }
+        #region --- Overrides ---
 
         public override async void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
 
-            if (App.UpdateList) {
+            if (_settingsManager.IsListUpdated) {
                 await updateProfileList();
-                App.UpdateList = false;
+                _settingsManager.IsListUpdated = false;
             }
-
-            // set or update all settings
-            ThemeManager.UpdateTheme(App.CurrentSettings.Theme);
-            MessagingCenter.Send<object, CultureChangedMessage>(this, string.Empty, new CultureChangedMessage(App.CurrentSettings.Language));
         }
+
+        #endregion
+
+        #region --- Helpers ---
+
+        private async Task updateProfileList()
+        {
+            this.ProfileList.Clear();
+            IsEmpty = true;
+
+            var profiles = await _profileManager.GetProfiles(Preferences.Get("UserId", 0));
+
+            if (profiles != null && profiles.Count() > 0) {
+                profiles.ToList().ForEach(item => this.ProfileList.Add(item));
+                IsEmpty = false;
+            }
+        }
+
+        #endregion
     }
 }

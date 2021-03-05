@@ -1,8 +1,10 @@
 ﻿using Prism.Commands;
 using Prism.Navigation;
-using ProfileBook.Services.Authentication;
+using Prism.Services;
+using ProfileBook.Services.Authorization;
 using ProfileBook.Views;
 using System;
+using System.ComponentModel;
 using System.Windows.Input;
 using Xamarin.Forms;
 
@@ -10,72 +12,76 @@ namespace ProfileBook.ViewModels
 {
     public class SignInPageViewModel : ViewModelBase, INavigatedAware
     {
-        private readonly IAuthenticationService authenticationService;
+        private readonly IAuthorizationManager _authorizationService;
+        private readonly IPageDialogService _pageDialogService;
 
-        private string userLogin;
+        #region --- Properties ---
+
+        private string _userLogin;
         public string UserLogin {
-            get => userLogin;
-            set {
-                SetProperty(ref userLogin, value, nameof(UserLogin));
-                RaiseValidationChanded();
-            }
+            get => _userLogin;
+            set => SetProperty(ref _userLogin, value, nameof(UserLogin));
+
         }
 
-        private string userPassword;
+        private string _userPassword;
         public string UserPassword {
-            get => userPassword;
-            set {
-                SetProperty(ref userPassword, value, nameof(UserPassword));
-                RaiseValidationChanded();
-            }
+            get => _userPassword;
+            set => SetProperty(ref _userPassword, value, nameof(UserPassword));
         }
 
-        private bool isValid;
+        private bool _isValid;
         public bool IsValid {
-            get { return isValid; }
-            set { SetProperty(ref isValid, value, nameof(IsValid)); }
+            get => _isValid;
+            set => SetProperty(ref _isValid, value, nameof(IsValid));
         }
 
-        private void RaiseValidationChanded()
-        {
-            this.IsValid = UserPassword != null &&
-                           UserPassword.Length != 0 && 
-                           userLogin != null &&
-                           UserLogin.Length != 0;
-        }
+        #endregion
 
-        public SignInPageViewModel(INavigationService navigationService, IAuthenticationService authenticationService) : base(navigationService)
+        public SignInPageViewModel(INavigationService navigationService, IAuthorizationManager authorizationService, IPageDialogService pageDialogService) : base(navigationService)
         {
-            this.userLogin = String.Empty;
-            this.userPassword = String.Empty;
+            this._pageDialogService = pageDialogService;
+            this._authorizationService = authorizationService;
+
+            this._userLogin = String.Empty;
+            this._userPassword = String.Empty;
 
             this.SignInCommand = new DelegateCommand(executeSignIn).ObservesCanExecute(() => IsValid);
-            this.SignUpCommand = new Command(executeSignUp);
-
-            this.authenticationService = authenticationService;
         }
+
+        #region --- Commands ---
 
         public DelegateCommand SignInCommand { get; set; }
 
-        /// <summary>
-        /// navigate to main list
-        /// </summary>
         private async void executeSignIn()
         {
-            if (await this.authenticationService.SignIn(this.UserLogin, this.UserPassword)) {
-                App.UpdateList = true;
-                await NavigationService.NavigateAsync($"/NavigationPage/{nameof(MainListPage)}");
+            if (await this._authorizationService.SignIn(this.UserLogin, this.UserPassword)) {
+                await NavigationService.NavigateAsync($"/{nameof(NavigationPage)}/{nameof(MainListPage)}");
+            }
+            else {
+                await _pageDialogService.DisplayAlertAsync("SignIn", "Invalid login or password!", "OK");
             }
         }
 
-        public ICommand SignUpCommand { get; set; }
-
-        /// <summary>
-        /// navigate to sign up
-        /// </summary>
-        private async void executeSignUp()
-        {
+        public ICommand SignUpCommand => new Command(async () => {
             await NavigationService.NavigateAsync(nameof(SignUpPage));
+        });
+
+        #endregion
+
+        #region --- Overrides ---
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+
+            if (args.PropertyName == nameof(UserLogin) || args.PropertyName == nameof(UserPassword)) {
+
+                this.IsValid = UserPassword != null &&
+                           UserPassword.Length != 0 &&
+                           _userLogin != null &&
+                           UserLogin.Length != 0;
+            }
         }
 
 
@@ -84,5 +90,7 @@ namespace ProfileBook.ViewModels
             base.OnNavigatedTo(parameters);
             this.UserLogin = parameters.GetValue<string>("Login");
         }
+
+        #endregion
     }
 }

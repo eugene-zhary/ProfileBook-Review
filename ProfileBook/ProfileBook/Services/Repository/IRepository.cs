@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProfileBook.Services.Repository
 {
-    public interface IRepository<T> where T : IModel, new()
+    public interface IRepository<T> where T : IEntityModel, new()
     {
         /// <summary>
         /// get all elements from database

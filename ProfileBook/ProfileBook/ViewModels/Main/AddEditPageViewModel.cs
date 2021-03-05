@@ -1,52 +1,68 @@
 ﻿using Prism.Navigation;
+using ProfileBook.Localization;
 using ProfileBook.Models;
 using ProfileBook.Services.Profile;
+using ProfileBook.Validators;
 using System.Windows.Input;
 using Xamarin.Forms;
+using System;
+using Prism.Services;
+using ProfileBook.Views;
+using Prism.Services.Dialogs;
+using ProfileBook.Dialogs;
 
 namespace ProfileBook.ViewModels
 {
     public class AddEditPageViewModel : ViewModelBase, INavigatedAware
     {
         public Profile CurrentProfile { get; set; }
-        private IProfileService profileService;
 
-        public AddEditPageViewModel(IProfileService profileService, INavigationService navigationService) : base(navigationService)
+        private readonly IProfileManager _profileManager;
+        private readonly IPageDialogService _pageDialogService;
+        private readonly IDialogService _dialogService;
+
+        public AddEditPageViewModel(IProfileManager profileManager, 
+            INavigationService navigationService, 
+            IPageDialogService pageDialogService, 
+            IDialogService dialogService) : base(navigationService)
         {
-            this.profileService = profileService;
+            this._profileManager = profileManager;
+            this._pageDialogService = pageDialogService;
+            this._dialogService = dialogService;
+
             CurrentProfile = new Profile();
-
-            SaveProfileCommand = new Command(executeSaveProfile);
-            OpenImageDialogCommand = new Command(executeImageDialog);
         }
 
+        #region --- Commands ---
 
-        public ICommand SaveProfileCommand { get; private set; }
+        public ICommand SaveProfileCommand => new Command(async () => {
 
-        /// <summary>
-        /// save current profile
-        /// </summary>
-        private async void executeSaveProfile()
-        {
-            if (await profileService.SaveProfile(CurrentProfile)) {
-                App.UpdateList = true;
-                await NavigationService.NavigateAsync("/NavigationPage/MainListPage");
+            string hints = ValidationHints.GetProfileHints(CurrentProfile, Resources["AddEditValidateName"], Resources["AddEditValidateNickName"]);
+
+            if (!hints.Equals(String.Empty)) {
+                await _pageDialogService.DisplayAlertAsync(Resources["AddEditAlertTitle"], hints, Resources["Confirm"]);
+                return;
             }
-        }
 
-        public ICommand OpenImageDialogCommand { get; private set; }
+            await _profileManager.SaveProfile(CurrentProfile);
+            await NavigationService.NavigateAsync($"/{nameof(NavigationPage)}/{nameof(MainListPage)}");
+        });
 
-        /// <summary>
-        /// set the new image
-        /// </summary>
-        private async void executeImageDialog()
-        {
-            string img_path = await profileService.GetImagePath(CurrentProfile);
+        public ICommand OpenImageDialogCommand => new Command(async () => {
+
+            IDialogResult result = await _dialogService.ShowDialogAsync(nameof(PickImageDialog));
+            string img_path = result.Parameters.GetValue<string>("ImagePath");
+
             if (img_path != null) {
                 CurrentProfile.Image = img_path;
                 RaisePropertyChanged(nameof(CurrentProfile));
+                await _profileManager.SaveProfile(CurrentProfile);
             }
-        }
+        });
+
+        #endregion
+
+        #region --- Overrides ---
 
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
@@ -57,5 +73,7 @@ namespace ProfileBook.ViewModels
                 RaisePropertyChanged(nameof(CurrentProfile));
             }
         }
+
+        #endregion
     }
 }

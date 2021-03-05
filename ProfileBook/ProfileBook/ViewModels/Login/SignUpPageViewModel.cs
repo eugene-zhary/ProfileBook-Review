@@ -2,77 +2,104 @@
 using Prism.Navigation;
 using System;
 using ProfileBook.Services.Authorization;
+using System.ComponentModel;
+using Xamarin.Forms;
+using ProfileBook.Views;
+using Prism.Services;
 
 namespace ProfileBook.ViewModels
 {
     public class SignUpPageViewModel : ViewModelBase
     {
-        private readonly IAuthorizationService authorizationService;
+        private readonly IAuthorizationManager _authorizationService;
+        private readonly IPageDialogService _pageDialogService;
 
-        private string userLogin;
+        #region --- Properties ---
+
+        private string _userLogin;
         public string UserLogin {
-            get => userLogin;
-            set {
-                SetProperty(ref userLogin, value, nameof(UserLogin));
-                RaiseValidationChanded();
-            }
+            get => _userLogin;
+            set => SetProperty(ref _userLogin, value, nameof(UserLogin));
         }
-        private string userPassword;
+        private string _userPassword;
         public string UserPassword {
-            get => userPassword;
-            set {
-                SetProperty(ref userPassword, value, nameof(UserPassword));
-                RaiseValidationChanded();
-            }
+            get => _userPassword;
+            set => SetProperty(ref _userPassword, value, nameof(UserPassword));
         }
-        private string userConfirmPassword;
+        private string _userConfirmPassword;
         public string UserConfirmPassword {
-            get => userConfirmPassword;
-            set {
-                SetProperty(ref userConfirmPassword, value, nameof(UserConfirmPassword));
-                RaiseValidationChanded();
-            }
+            get => _userConfirmPassword;
+            set => SetProperty(ref _userConfirmPassword, value, nameof(UserConfirmPassword));
         }
 
-        private bool isValid;
+        private bool _isValid;
         public bool IsValid {
-            get { return isValid; }
-            set { SetProperty(ref isValid, value, nameof(IsValid)); }
+            get => _isValid;
+            set => SetProperty(ref _isValid, value, nameof(IsValid));
         }
 
-        private void RaiseValidationChanded()
-        {
-            this.IsValid = UserPassword != null &&
-                           UserPassword.Length != 0 && 
-                           UserLogin != null &&
-                           UserLogin.Length != 0 && 
-                           UserConfirmPassword != null &&
-                           UserConfirmPassword.Length != 0;
-        }
+        #endregion
 
-        public SignUpPageViewModel(INavigationService navigationService, IAuthorizationService authorizationService) : base(navigationService)
+        public SignUpPageViewModel(INavigationService navigationService, IAuthorizationManager authorizationService, IPageDialogService pageDialogService) : base(navigationService)
         {
-            this.authorizationService = authorizationService;
+            this._authorizationService = authorizationService;
+            this._pageDialogService = pageDialogService;
 
-            this.userLogin = String.Empty;
-            this.userPassword = String.Empty;
-            this.userConfirmPassword = String.Empty;
+            this._userLogin = String.Empty;
+            this._userPassword = String.Empty;
+            this._userConfirmPassword = String.Empty;
 
             this.SignUpCommand = new DelegateCommand(executeSignUp).ObservesCanExecute(() => IsValid);
         }
 
+        #region --- Commands ---
+
         public DelegateCommand SignUpCommand { get; set; }
 
-        /// <summary>
-        /// authorizate new account, then navigate to the sign in with a new login
-        /// </summary>
         private async void executeSignUp()
         {
-            if (await authorizationService.RegUser(this.UserLogin, this.UserPassword, this.UserConfirmPassword)) {
-                var nav_params = new NavigationParameters();
-                nav_params.Add("Login", this.UserLogin);
-                await NavigationService.NavigateAsync("/NavigationPage/SignInPage", nav_params);
+            string hints = Validators.ValidationHints.GetSignUpHints(UserLogin, UserPassword, UserConfirmPassword);
+
+            if (hints.Length > 0) {
+                await this._pageDialogService.DisplayAlertAsync("SignUp", hints, "OK");
+                return;
+            }
+
+            if (await _authorizationService.RegUser(this.UserLogin, this.UserPassword, this.UserConfirmPassword)) {
+                var nav_params = new NavigationParameters {
+                    { "Login", this.UserLogin }
+                };
+                await NavigationService.NavigateAsync($"/{nameof(NavigationPage)}/{nameof(SignInPage)}", nav_params);
+            }
+            else {
+                await this._pageDialogService.DisplayAlertAsync("SignUp", "Login already exists", "OK");
             }
         }
+
+        #endregion
+
+        #region --- Overrides ---
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+
+            switch (args.PropertyName) {
+                case nameof(UserLogin):
+                case nameof(UserPassword):
+                case nameof(UserConfirmPassword):
+
+                    this.IsValid = UserPassword != null &&
+                          UserPassword.Length != 0 &&
+                          UserLogin != null &&
+                          UserLogin.Length != 0 &&
+                          UserConfirmPassword != null &&
+                          UserConfirmPassword.Length != 0;
+
+                    break;
+            }
+        }
+
+        #endregion
     }
 }

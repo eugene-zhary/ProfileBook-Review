@@ -9,8 +9,8 @@
                 <Setter Property="Opacity" Value="0" />
             </Style>
             <Color x:Key="PrimaryColor">#1d3557</Color>
-            <Color x:Key="BackColor">White</Color>
-            <Color x:Key="FrontColor">#0077b6</Color>
+            <Color x:Key="BackColor">#ffffff</Color>
+            <Color x:Key="FrontColor">#457b9d</Color>
             <Style TargetType="NavigationPage">
                 <Setter Property="BarBackgroundColor" Value="{DynamicResource FrontColor}"></Setter>
                 <Setter Property="BarTextColor" Value="White"></Setter>

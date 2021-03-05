@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
+using ProfileBook.Services.Settings;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace ProfileBook.ViewModels.Dialogs
 {
     public class PickImageDialogViewModel : BindableBase, IDialogAware
     {
+        private readonly ISettingsManager _settingsManager;
+
         public string CameraImagePath { get; set; }
         public string GalleryImagePath { get; set; }
 
@@ -24,13 +27,13 @@ namespace ProfileBook.ViewModels.Dialogs
         /// </summary>
         private void setImgPath()
         {
-            switch (App.CurrentSettings.Theme) {
-                case Enums.Theme.Dark:
+            switch (_settingsManager.Theme) {
+                case Enums.ETheme.Dark:
                     CameraImagePath = "ic_camera_alt.png";
                     GalleryImagePath = "ic_collections.png";
                     break;
                 default:
-                case Enums.Theme.Light:
+                case Enums.ETheme.Light:
                     CameraImagePath = "ic_camera_alt_black.png";
                     GalleryImagePath = "ic_collections_black.png";
                     break;
@@ -41,8 +44,10 @@ namespace ProfileBook.ViewModels.Dialogs
 
         public void OnDialogClosed() { }
 
-        public PickImageDialogViewModel()
+        public PickImageDialogViewModel(ISettingsManager settingsManager)
         {
+            this._settingsManager = settingsManager;
+
             setImgPath();
             CameraCommand = new Command(executeCamera);
             GalleryCommand = new Command(executeGallery);
